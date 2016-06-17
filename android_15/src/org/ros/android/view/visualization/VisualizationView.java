@@ -167,7 +167,20 @@ public class VisualizationView extends GLSurfaceView implements NodeMain {
   }
 
   public void addLayer(Layer layer) {
-        layers.add(layer);
+    synchronized (renderer.mutex) {
+      layers.add(layer);
+    }
+  }
+
+  public void removeLayer(Layer layer) {
+    layer.onShutdown(this, connectedNode);
+    synchronized (renderer.mutex) {
+      layers.remove(layer);
+    }
+  }
+
+  public void startLayer(Layer layer) {
+    layer.onStart(this, connectedNode);
   }
 
   @Override

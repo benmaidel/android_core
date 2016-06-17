@@ -32,6 +32,7 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class XYOrthographicRenderer implements GLSurfaceView.Renderer {
 
+  public final Object mutex = new Object();
   private static final Color BACKGROUND_COLOR = new Color(0.87f, 0.87f, 0.87f, 1.f);
 
   private final VisualizationView view;
@@ -65,17 +66,19 @@ public class XYOrthographicRenderer implements GLSurfaceView.Renderer {
   }
 
   private void drawLayers(GL10 gl) {
-    for (Layer layer : view.getLayers()) {
-      gl.glPushMatrix();
-      if (layer instanceof TfLayer) {
-        GraphName layerFrame = ((TfLayer) layer).getFrame();
-        if (layerFrame != null && view.getCamera().applyFrameTransform(gl, layerFrame)) {
+    synchronized (mutex) {
+      for (Layer layer : view.getLayers()) {
+        gl.glPushMatrix();
+        if (layer instanceof TfLayer) {
+          GraphName layerFrame = ((TfLayer) layer).getFrame();
+          if (layerFrame != null && view.getCamera().applyFrameTransform(gl, layerFrame)) {
+            layer.draw(view, gl);
+          }
+        } else {
           layer.draw(view, gl);
         }
-      } else {
-        layer.draw(view, gl);
+        gl.glPopMatrix();
       }
-      gl.glPopMatrix();
     }
   }
 

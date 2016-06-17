@@ -21,6 +21,7 @@ import android.content.SharedPreferences;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import java.util.List;
 
@@ -122,7 +123,7 @@ class DistanceRenderer implements GLSurfaceView.Renderer {
 
   @Override
   public void onSurfaceCreated(GL10 gl, EGLConfig arg1) {
-    gl.glClearColor(0.0f, 0.0f, 0.0f, 0.5f);
+    gl.glClearColor(1.0f, 1.0f, 1.0f, 0.5f);
     rangeLines = new DistancePoints();
   }
 
@@ -169,6 +170,13 @@ class DistanceRenderer implements GLSurfaceView.Renderer {
    */
   public void setZoomMode(ZoomMode mode) {
     zoomMode = mode;
+  }
+
+  /**
+   * Gets the zoom mode.
+   */
+  public ZoomMode getZoomMode() {
+    return zoomMode;
   }
 
   /**
@@ -220,7 +228,7 @@ class DistanceRenderer implements GLSurfaceView.Renderer {
       float thIncrement, float minDistToObject) {
     if (zoomMode == ZoomMode.CLUTTER_ZOOM_MODE) {
       // The closest object should be at the 80% of FOV mark.
-      setZoom(minDistToObject * 1.25f);
+      setZoom(minDistToObject * 2.25f);
     }
     // Update the distance ranges based on the incoming data.
     rangeLines.updateRange(range, maxRange, minRange, minTh, thIncrement);

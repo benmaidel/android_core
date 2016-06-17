@@ -37,7 +37,7 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class PathLayer extends SubscriberLayer<nav_msgs.Path> implements TfLayer {
 
-  private static final Color COLOR = Color.fromHexAndAlpha("03dfc9", 0.3f);
+  private static Color COLOR = Color.fromHexAndAlpha("03dfc9", 0.3f);
   private static final float POINT_SIZE = 5.0f;
 
   private FloatBuffer vertexBuffer;
@@ -46,6 +46,11 @@ public class PathLayer extends SubscriberLayer<nav_msgs.Path> implements TfLayer
 
   public PathLayer(String topic) {
     this(GraphName.of(topic));
+  }
+
+  public PathLayer(String topic, Color color) {
+    this(GraphName.of(topic));
+    COLOR = color;
   }
 
   public PathLayer(GraphName topic) {
