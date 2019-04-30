@@ -17,9 +17,11 @@
 package org.ros.android.view;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -51,6 +53,10 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
    */
   private String laserTopic;
   /**
+   * Topic for the cmd velocity.
+   */
+  private String cmdVelTopic;
+  /**
    * Distance between 2 contacts on the view (in pixels). Used while zooming
    * in/out.
    */
@@ -80,7 +86,7 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
     distanceRenderer = new DistanceRenderer();
     setEGLConfigChooser(8, 8, 8, 8, 16, 0);
     getHolder().setFormat(PixelFormat.TRANSLUCENT);
-    setZOrderOnTop(true);
+    //setZOrderOnTop(true);
     setRenderer(distanceRenderer);
     // This is important since the display needs to be updated only when new
     // data is received.
@@ -93,8 +99,18 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
    * @param topicName
    *          Name of the ROS topic.
    */
-  public void setTopicName(String topicName) {
+  public void setLaserTopicName(String topicName) {
     this.laserTopic = topicName;
+  }
+
+  /**
+   * Sets the topic that the distance view node should subscribe to.
+   *
+   * @param topicName
+   *          Name of the ROS topic.
+   */
+  public void setCmdVelTopicName(String topicName) {
+    this.cmdVelTopic = topicName;
   }
 
   @Override
@@ -111,7 +127,7 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
     // Subscribe to the command velocity. This is needed for auto adjusting the
     // zoom in ZoomMode.VELOCITY_ZOOM_MODE mode.
     Subscriber<geometry_msgs.Twist> twistSubscriber =
-        connectedNode.newSubscriber("cmd_vel", geometry_msgs.Twist._TYPE);
+        connectedNode.newSubscriber(cmdVelTopic, geometry_msgs.Twist._TYPE);
     twistSubscriber.addMessageListener(new MessageListener<geometry_msgs.Twist>() {
       @Override
       public void onNewMessage(final geometry_msgs.Twist robotVelocity) {
@@ -151,13 +167,21 @@ public class DistanceView extends GLSurfaceView implements OnTouchListener, Node
         float minDistToObject = message.getRangeMax();
         // Find the distance to the closest object and also create an List
         // for the ranges.
-        for (float range : message.getRanges()) {
+        int inc = 0;
+        if((message.getRanges().length % 2) == 0)
+          inc = 2;
+        else
+          inc = 3;
+        for (int i = 0; i < message.getRanges().length; i+=inc) {
+          float range = message.getRanges()[i];
           outRanges.add(range);
+          if(range == 0)
+            continue;
           minDistToObject = (minDistToObject > range) ? range : minDistToObject;
         }
         // Update the renderer with the latest range values.
         distanceRenderer.updateRange(outRanges, message.getRangeMax(), message.getRangeMin(),
-            message.getAngleMin(), message.getAngleIncrement(), minDistToObject);
+            message.getAngleMin(), message.getAngleIncrement()*inc, minDistToObject);
         // Request to render the surface.
         requestRender();
       }

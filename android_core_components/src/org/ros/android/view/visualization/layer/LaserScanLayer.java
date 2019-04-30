@@ -40,8 +40,8 @@ public class LaserScanLayer extends SubscriberLayer<sensor_msgs.LaserScan> imple
 
   private static final Color FREE_SPACE_COLOR = Color.fromHexAndAlpha("377dfa", 0.1f);
   private static final Color OCCUPIED_SPACE_COLOR = Color.fromHexAndAlpha("377dfa", 0.3f);
-  private static final float LASER_SCAN_POINT_SIZE = 10.f;
-  private static final int LASER_SCAN_STRIDE = 15;
+  private static final float LASER_SCAN_POINT_SIZE = 8.f;
+  private static final int LASER_SCAN_STRIDE = 5;
 
   private final Object mutex;
 
